@@ -62,4 +62,4 @@ typings/
 old/
 
 # dist folder only deployed on npm
-dist/
+#dist/
