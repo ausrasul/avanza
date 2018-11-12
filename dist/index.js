@@ -803,6 +803,20 @@ var Avanza = function (_EventEmitter) {
     }
 
     /**
+    * Place an order using same options as is available to web client.
+    */
+
+  }, {
+    key: 'placeWebOrder',
+    value: function placeWebOrder(options) {
+      return this.call('POST', constants.paths.WEB_ORDER_PATH, options, {
+        'X-AuthenticationSession': this._authenticationSession,
+        'AZA-loggedin': true,
+        'AZA-usertoken': this._securityToken
+      });
+    }
+
+    /**
      * Get information about an order.
      *
      * It is quite hard to automatically generate tables of what this endpoint
@@ -898,11 +912,12 @@ var Avanza = function (_EventEmitter) {
     key: 'call',
     value: function call() {
       var method = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'GET';
+      var path = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
 
       var _this8 = this;
 
-      var path = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
       var data = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+      var headers = arguments[3];
 
       var authenticationSession = this._authenticationSession;
       var securityToken = this._securityToken;
@@ -911,7 +926,13 @@ var Avanza = function (_EventEmitter) {
       if (path.slice(-1) === '?') {
         path = path.slice(0, -1);
       }
-
+      var headers_ = {
+        'X-AuthenticationSession': authenticationSession,
+        'X-SecurityToken': securityToken
+      };
+      if (headers !== undefined) {
+        headers_ = headers;
+      }
       return new Promise(function (resolve, reject) {
         if (!_this8._authenticated) {
           reject('Expected to be authenticated before calling.');
@@ -920,10 +941,7 @@ var Avanza = function (_EventEmitter) {
             method: method,
             path: path,
             data: data,
-            headers: {
-              'X-AuthenticationSession': authenticationSession,
-              'X-SecurityToken': securityToken
-            }
+            headers: headers_
           }).then(function (response) {
             return resolve(response.body);
           }).catch(function (e) {
